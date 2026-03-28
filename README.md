@@ -1,3 +1,4 @@
+
 # Ex.No:4 Create Your Own Content Providers to get Contacts details.
 
 
@@ -7,171 +8,184 @@ To create your own content providers to get contacts details using Android Studi
 
 ## EQUIPMENTS REQUIRED:
 
-Android Studio(Min. required Artic Fox)
+Android Studio(Latest Version)
 
 ## ALGORITHM:
 
 Step 1: Open Android Stdio and then click on File -> New -> New project.
-Step 2: Then type the Application name as “ex.no.3″ and click Next. 
+
+Step 2: Then type the Application name as “contentprovider″ and click Next. 
+
 Step 3: Then select the Minimum SDK as shown below and click Next.
+
 Step 4: Then select the Empty Activity and click Next. Finally click Finish.
-Step 5: Design layout in activity_main.xml
+
+Step 5: Design layout in activity_main.xml.
+
 Step 6: Get contacts details and Display details give in MainActivity file.
+
 Step 7: Save and run the application.
 
 ## PROGRAM:
 ```
 /*
-Program to print the text create your own content providers to get contacts details.
-Developed by: Harshini R
-Registeration Number: 212223220033
+Program to print the contact name and phone number using content providers.
+Developed by: Aswini M
+Registeration Number : 212223220010
 */
 ```
-
-activity_main.xml
+### AndroidManifist.xml
 ```
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="20dp">
-
-    <Button
-        android:id="@+id/btnGetContacts"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@android:color/holo_purple"
-        android:text="GET CONTACTS"
-        android:textColor="@android:color/white" />
-
-    <TextView
-        android:id="@+id/tvContacts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:textColor="@android:color/black"
-        android:textSize="16sp" />
-
-</LinearLayout>
-```
-MainActivity.java
-```
-package com.example.contentprovider;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.example.contentprovider.R;
-
-public class MainActivity extends AppCompatActivity {
-
-    private static final int REQUEST_CONTACT_PERMISSION = 1;
-
-    Button btnGetContacts;
-    TextView tvContacts;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        btnGetContacts = findViewById(R.id.btnGetContacts);
-        tvContacts = findViewById(R.id.tvContacts);
-
-        btnGetContacts.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACT_PERMISSION);
-                } else {
-                    getContacts();
-                }
-            }
-        });
-    }
-
-    private void getContacts() {
-        StringBuilder builder = new StringBuilder();
-
-        Cursor cursor = getContentResolver().query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                null, null, null, null);
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                String name = cursor.getString(
-                        cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                String phone = cursor.getString(
-                        cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                builder.append("Name: ").append(name).append("\nPhone: ").append(phone).append("\n\n");
-            }
-            cursor.close();
-        }
-
-        tvContacts.setText(builder.toString());
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == REQUEST_CONTACT_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getContacts();
-            } else {
-                Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-}
-```
-
-AndroidManifest.xml
-```
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.contentprovider">
-
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    xmlns:tools="http://schemas.android.com/tools">
+<uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 
     <application
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Contentprovider">
+        android:theme="@style/Theme.ContentProvider">
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
 ```
+### MainActivity.java
+```
+package com.example.contentprovider;
+
+import android.Manifest;
+import android.content.ContentResolver;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.util.Log;
+import android.view.View;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+public class MainActivity extends AppCompatActivity
+{
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+    }
+    public void btnGetContactPressed(View v)
+    {
+        getPhoneContacts();
+    }
+
+    public void getPhoneContacts()
+    {
+        if(ContextCompat.checkSelfPermission(this , Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this , new String[] {Manifest.permission.READ_CONTACTS} , 1);
+            return;
+        }
+
+        ContentResolver contentResolver = getContentResolver();
+        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        try (Cursor cursor = contentResolver.query(uri, null, null, null, null))
+        {
+            if (cursor != null && cursor.getCount() > 0)
+            {
+                Log.i("CONTACT_PROVIDER_DEMO",
+                        "TOTAL # of Contacts ::: " + cursor.getCount());
+
+                while (cursor.moveToNext())
+                {
+                    String contactName = cursor.getString(
+                            cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                    String contactNumber = cursor.getString(
+                            cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                    Log.i("CONTACT_PROVIDER_DEMO",
+                            "Contact Name ::: " + contactName + " Contact Number ::: " + contactNumber);
+                }
+            }
+            else
+            {
+                Log.e("CONTACT_PROVIDER_DEMO", "No contacts found or cursor is null");
+            }
+        }
+    }
+}
+```
+### activity_main.xml
+```
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="153dp"
+        android:layout_height="65dp"
+        android:onClick="btnGetContactPressed"
+        android:text="Get Contacts"
+        android:textColorLink="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.459" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="173dp"
+        android:layout_height="31dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="ContentProvider"
+        android:textColor="#6851A5"
+        android:textSize="24sp"
+        android:typeface="serif"
+        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.779" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
 ## OUTPUT
-<img width="1095" height="615" alt="image" src="https://github.com/user-attachments/assets/942a5d1c-1cde-4204-a63f-666e0bb73232" />
-<img width="713" height="397" alt="image" src="https://github.com/user-attachments/assets/678459fb-81b5-4da3-a1ba-bfd705ad6d4c" />
+### MainActivity.java
+<img width="1919" height="1139" alt="image" src="https://github.com/user-attachments/assets/1635be78-4ac0-4fd0-bfe1-22703189f55f" />
+### AndroidManifist.xml
+<img width="1917" height="1137" alt="image" src="https://github.com/user-attachments/assets/61fafeb2-1f7a-48ab-956f-a55da8c574a2" />
+### activity_main.xml
+<img width="1919" height="1136" alt="image" src="https://github.com/user-attachments/assets/646b6b67-07e0-4296-9fae-8d3852350be7" />
+### ContentProvider App
+<img width="449" height="795" alt="image" src="https://github.com/user-attachments/assets/eccfae1f-5b3b-4909-b3c1-2cb5932b1e97" />
+### Contacts from Mobile Via LogCat
+<img width="1916" height="1146" alt="image" src="https://github.com/user-attachments/assets/c52e8811-5d65-4520-800a-5dbbf3f08953" />
+
 
 
 
